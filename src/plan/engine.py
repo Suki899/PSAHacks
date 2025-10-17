@@ -1,8 +1,9 @@
 from collections import namedtuple
+from typing import List
 
 import pandas as pd
 
-from src.plan.job_planner import JobPlanner
+from src.plan.job_planner import JobPlanner, VariantPlanResult
 from src.plan.job_tracker import JobTracker
 
 
@@ -55,5 +56,15 @@ class PlanningEngine:
     def export_job_report(self):
         return self.job_tracker.export_job_report()
 
-    def plan(self):
-        return self.job_planner.plan(self.job_tracker)
+    def set_planner_variant(self, variant_name: str):
+        self.job_planner.set_default_variant(variant_name)
+
+    def plan(self, variant_name: str = None):
+        return self.job_planner.plan(self.job_tracker, variant_name=variant_name)
+
+    def plan_variants(
+        self, variant_names: List[str] = None
+    ) -> List[VariantPlanResult]:
+        return self.job_planner.plan_variants(
+            self.job_tracker, variant_names=variant_names
+        )

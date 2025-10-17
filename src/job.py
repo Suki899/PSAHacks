@@ -201,6 +201,10 @@ class Job:
         self.__QC_status: Status = Status.NOT_STARTED
         self.__HT_status: Status = Status.NOT_STARTED
 
+    def get_instructions(self) -> List[JobInstruction]:
+        """Return a copy of the planned instructions for inspection."""
+        return list(self.__instructions)
+
     def start_job(self, timestamp: int):
         self.__job_status = Status.IN_PROGRESS
         self.__start_time = timestamp

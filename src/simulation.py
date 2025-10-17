@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from logzero import logger
@@ -14,6 +14,7 @@ from src.operators import (
     YardOperator,
 )
 from src.plan.engine import PlanningEngine
+from src.plan.job_planner import VariantPlanResult
 
 
 class Simulation:
@@ -37,7 +38,7 @@ class Simulation:
         A countdown timer used for scheduling planning operations.
     """
 
-    def __init__(self):
+    def __init__(self, planner_variant: Optional[str] = None):
         operation_resources = self.create_operation_resources()
         monitoring_resources = self.create_monitoring_resources(operation_resources)
 
@@ -45,6 +46,8 @@ class Simulation:
         self.planning_engine = PlanningEngine(
             job_df=input_df, monitoring_resources=monitoring_resources
         )
+        if planner_variant:
+            self.planning_engine.set_planner_variant(planner_variant)
         self.operation_engine = OperationEngine(
             operation_resources=operation_resources,
             monitoring_resources=monitoring_resources,
@@ -76,6 +79,15 @@ class Simulation:
 
         self.plan_countdown -= CONSTANT.JOB_PARAMETER.SYSTEM_TIME_PASSED
         return False
+
+    def set_planning_variant(self, variant_name: str):
+        self.planning_engine.set_planner_variant(variant_name)
+
+    def compare_planning_variants(
+        self, variant_names: Optional[List[str]] = None
+    ) -> List[VariantPlanResult]:
+        """Return planning previews for the requested variants without altering state."""
+        return self.planning_engine.plan_variants(variant_names=variant_names)
 
     def create_operation_resources(self) -> namedtuple:
         # create sectors
